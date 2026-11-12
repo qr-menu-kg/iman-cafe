@@ -50,8 +50,8 @@
       <svg class="w-16 h-16 mx-auto mb-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
       </svg>
-      <h3 class="text-lg font-bold text-gray-400">Нет активных задач</h3>
-      <p class="text-xs mt-1 text-gray-500">Ожидаем новые заказы и вызовы со столиков...</p>
+      <h3 class="text-lg font-bold text-gray-400">Список пуст</h3>
+      <p class="text-xs mt-1 text-gray-500">Здесь появятся активные заказы или архив...</p>
     </div>
   </main>
 
@@ -94,7 +94,7 @@
     let audioAllowed = false;
     let currentTab = 'active'; 
     let ordersCache = {};
-    let previousOrdersCount = -1; // Исправлено для точного отлова первого звука
+    let previousOrdersCount = -1;
 
     enableAudioBtn.addEventListener('click', () => {
       audioAllowed = !audioAllowed;
@@ -164,7 +164,6 @@
       ordersCache = data || {};
 
       const ordersList = Object.entries(ordersCache);
-      // Активными считаем заказы со статусом new/cooking ИЛИ любые сервисные запросы со статусом new
       const activeCount = ordersList.filter(([_, o]) => o.status === 'new' || o.status === 'cooking').length;
       countActiveEl.textContent = activeCount;
 
@@ -172,11 +171,7 @@
       if (previousOrdersCount !== -1 && newOrdersCount > previousOrdersCount) {
         playBeep();
       }
-      if (previousOrdersCount === -1) {
-        previousOrdersCount = newOrdersCount; // инициализация при первой загрузке
-      } else {
-        previousOrdersCount = newOrdersCount;
-      }
+      previousOrdersCount = newOrdersCount;
 
       renderOrders();
     });
@@ -198,10 +193,8 @@
       let orders = Object.entries(data).map(([id, val]) => ({ id, ...val }));
       
       if (currentTab === 'active') {
-        // На вкладке Активные показываем заказы еды (new, cooking) и ВСЕ новые сервисные запросы
         orders = orders.filter(o => o.status === 'new' || o.status === 'cooking');
       } else {
-        // В истории только выданные заказы еды (сервисные вызовы сюда не попадают)
         orders = orders.filter(o => o.status === 'ready' && o.type !== 'service');
       }
 
@@ -273,7 +266,7 @@
           cardBorder = 'border-blue-600 bg-gray-900';
           timerBg = 'bg-blue-500/20 text-blue-400 border-blue-500/30';
         } else if (order.status === 'ready') {
-          cardBorder = 'border-gray-800 bg-gray-950/50 opacity-50';
+          cardBorder = 'border-gray-800 bg-gray-950/50 opacity-80';
         }
 
         const itemsHtml = order.items.map(i => `
@@ -320,11 +313,11 @@
                   </button>
                 ` : `
                   <div class="flex gap-2">
-                    <button onclick="updateStatus('${order.id}', 'new')" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs rounded-xl transition">
+                    <button onclick="updateStatus('${order.id}', 'cooking')" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs rounded-xl transition">
                       Вернуть
                     </button>
                     <button onclick="deleteOrder('${order.id}')" class="py-2 px-4 bg-red-950 hover:bg-red-900 text-red-400 font-bold text-xs rounded-xl transition">
-                      Удалить
+                      🗑 Удалить
                     </button>
                   </div>
                 `}
