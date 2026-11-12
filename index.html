@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Иман кафе — Меню</title>
+  <!-- Подключение Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Подключение шрифта Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Базовые настройки и скрытие скроллбара для горизонтальных вкладок */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #FAFAFA;
+      color: #111827;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Плавное появление элементов */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-500 selection:text-white pb-28">
+
+  <!-- ==================== ДЕМО-ПАНЕЛЬ ДЛЯ ПРЕЗЕНТАЦИИ КЛИЕНТАМ ==================== -->
+  <div id="demoBanner" class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white px-4 py-2.5 text-xs border-b border-gray-800">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-md bg-amber-500 text-gray-950 font-extrabold uppercase tracking-wider text-[10px]">Демо-версия</span>
+        <span class="text-gray-200 font-medium">Хотите такое же быстрое QR-меню для своего заведения?</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a 
+          href="https://wa.me/996556655995?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%9F%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B5%D0%BB%20%D0%B4%D0%B5%D0%BC%D0%BE%20QR-%D0%BC%D0%B5%D0%BD%D1%8E.%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D1%8C%20%D1%82%D0%B0%D0%BA%D0%BE%D0%B5%20%D0%B6%D0%B5%20%D0%B4%D0%BB%D1%8F%20%D1%81%D0%B2%D0%BE%D0%B5%D0%B3%D0%BE%20%D0%B7%D0%B0%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F." 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold px-3 py-1 rounded-lg transition active:scale-95"
+        >
+          <span>Заказать: +996 556 655 995</span>
+        </a>
+        <button id="closeDemoBannerBtn" type="button" class="text-gray-400 hover:text-white p-1" aria-label="Скрыть демо-плашку">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ШАПКА САЙТА (STICKY) ==================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
+    <div class="max-w-5xl mx-auto px-4 pt-3.5 pb-2.5">
+      <!-- Название заведения и статус -->
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Иман кафе</h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+              Открыто
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Бургеры • Шаурма • Пицца • Суши • Шашлык</p>
+        </div>
+
+        <!-- Кнопка вызова информации / Wi-Fi -->
+        <button id="infoBtn" type="button" class="p-2.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-gray-600 transition active:scale-95" aria-label="Информация о кафе">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Поле мгновенного поиска -->
+      <div class="relative mb-2.5">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Найти бургер, шаурму, роллы..." 
+          class="w-full pl-10 pr-9 py-2.5 bg-gray-100/80 border border-transparent focus:border-amber-500 focus:bg-white rounded-2xl text-sm text-gray-900 placeholder-gray-400 outline-none transition"
+        >
+        <button id="clearSearchBtn" type="button" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Горизонтальная навигация по категориям -->
+      <nav id="categoryTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" aria-label="Категории меню">
+        <!-- Кнопки категорий рендерятся через JS -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== ОСНОВНОЙ КОНТЕНТ (СЕТКА БЛЮД) ==================== -->
+  <main class="max-w-5xl mx-auto px-4 pt-4">
+    <!-- Заголовок текущей категории / счетчик -->
+    <div class="flex items-center justify-between mb-3.5">
+      <h2 id="currentCategoryTitle" class="text-lg font-bold text-gray-900">Все блюда</h2>
+      <span id="itemsCountLabel" class="text-xs font-medium text-gray-400"></span>
+    </div>
+
+    <!-- Сетка карточек -->
+    <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+      <!-- Карточки рендерятся через JS -->
+    </div>
+
+    <!-- Пустое состояние при поиске -->
+    <div id="emptyState" class="hidden text-center py-16 px-4">
+      <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-base font-semibold text-gray-900">Ничего не найдено</h3>
+      <p class="text-sm text-gray-500 mt-1">Попробуйте изменить запрос или выбрать другую категорию</p>
+      <button id="resetFiltersBtn" type="button" class="mt-4 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-800 transition">
+        Показать всё меню
+      </button>
+    </div>
+  </main>
+
+  <!-- ==================== ПЛАВАЮЩАЯ ПАНЕЛЬ КОРЗИНЫ ==================== -->
+  <div id="floatingCartBar" class="fixed bottom-4 inset-x-0 z-30 px-4 transition-all duration-300 translate-y-28 opacity-0 pointer-events-none">
+    <div class="max-w-lg mx-auto">
+      <button 
+        id="openCartBtn" 
+        type="button" 
+        class="w-full bg-gray-900 hover:bg-gray-800 active:scale-[0.99] text-white rounded-2xl p-3.5 shadow-xl shadow-gray-900/20 flex items-center justify-between transition"
+      >
+        <div class="flex items-center gap-3">
+          <span id="cartBadgeCount" class="bg-amber-500 text-gray-950 font-extrabold text-xs px-2.5 py-1 rounded-xl">0</span>
+          <span class="font-semibold text-sm sm:text-base">Мой заказ</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="cartTotalBar" class="font-bold text-base sm:text-lg">0 сом</span>
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО КОРЗИНЫ ==================== -->
+  <div id="cartModal" class="fixed inset-0 z-50 hidden">
+    <!-- Затемнение фона -->
+    <div id="cartBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"></div>
+
+    <!-- Выезжающая панель -->
+    <div class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col pointer-events-auto overflow-hidden animate-fade-in">
+        
+        <!-- Шапка модального окна -->
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">Ваш заказ</h3>
+            <p class="text-xs text-gray-500">Проверьте состав перед отправкой</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="clearCartBtn" type="button" class="text-xs font-medium text-red-500 hover:text-red-600 px-2.5 py-1.5 rounded-xl hover:bg-red-50 transition">
+              Очистить
+            </button>
+            <button id="closeCartBtn" type="button" class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition" aria-label="Закрыть">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Список выбранных блюд -->
+        <div id="cartItemsContainer" class="p-5 overflow-y-auto space-y-3.5 flex-1">
+          <!-- Позиции заказа рендерятся через JS -->
+        </div>
+
+        <!-- Параметры заказа и кнопки действий -->
+        <div class="p-5 bg-gray-50 border-t border-gray-100 space-y-3.5">
+          <!-- Выбор формата: В зале или С собой -->
+          <div class="grid grid-cols-2 gap-2 p-1 bg-gray-200/70 rounded-xl">
+            <button type="button" id="orderTypeTable" class="py-2 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-xs transition">
+              В зале (указать стол)
+            </button>
+            <button type="button" id="orderTypeTakeaway" class="py-2 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900 transition">
+              С собой (на вынос)
+            </button>
+          </div>
+
+          <!-- Поле номера стола / комментария -->
+          <div id="tableInputWrapper" class="flex items-center gap-2">
+            <input 
+              type="text" 
+              id="tableNumberInput" 
+              placeholder="Номер столика (например: 4)" 
+              class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-500 transition"
+            >
+          </div>
+
+          <!-- Итоговая сумма -->
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-sm font-medium text-gray-500">Итого к оплате:</span>
+            <span id="modalTotalSum" class="text-xl font-extrabold text-gray-900">0 сом</span>
+          </div>
+
+          <!-- Кнопки подтверждения -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <button 
+              id="showWaiterBtn" 
+              type="button" 
+              class="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm rounded-2xl transition active:scale-[0.98]"
+            >
+              Показать официанту
+            </button>
+            <button 
+              id="sendWhatsappBtn" 
+              type="button" 
+              class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-2xl transition flex items-center justify-center gap-2 active:scale-[0.98]"
+            >
+              <span>Отправить в WhatsApp</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ЭКРАН ПРЕДЪЯВЛЕНИЯ ЗАКАЗА ОФИЦИАНТУ ==================== -->
+  <div id="waiterScreenModal" class="fixed inset-0 z-50 hidden bg-white flex flex-col justify-between p-6 overflow-y-auto">
+    <div class="max-w-md mx-auto w-full">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Иман кафе</span>
+          <h2 class="text-2xl font-extrabold text-gray-900 mt-0.5">Ваш заказ готов</h2>
+        </div>
+        <button id="closeWaiterScreenBtn" type="button" class="p-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="my-4 p-3.5 bg-amber-50 border border-amber-200/70 rounded-2xl flex items-center justify-between">
+        <span class="text-sm font-medium text-amber-900">Место / Формат:</span>
+        <span id="waiterOrderLocation" class="text-sm font-extrabold text-amber-950">Стол № —</span>
+      </div>
+
+      <p class="text-xs text-gray-500 mb-3">Покажите этот экран официанту или на кассе:</p>
+
+      <div id="waiterOrderList" class="divide-y divide-gray-100 border-t border-b border-gray-100">
+        <!-- Список для официанта -->
+      </div>
+
+      <div class="flex items-center justify-between py-4">
+        <span class="text-base font-semibold text-gray-600">Общая сумма:</span>
+        <span id="waiterOrderTotal" class="text-2xl font-extrabold text-gray-900">0 сом</span>
+      </div>
+    </div>
+
+    <div class="max-w-md mx-auto w-full pt-4">
+      <button id="doneWaiterScreenBtn" type="button" class="w-full py-3.5 bg-gray-900 text-white font-bold rounded-2xl text-sm">
+        Вернуться в меню
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО ИНФОРМАЦИИ О КАФЕ ==================== -->
+  <div id="infoModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div id="infoBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-xs"></div>
+    <div class="relative bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl animate-fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-extrabold text-gray-900">О заведении</h3>
+        <button id="closeInfoBtn" type="button" class="p-1.5 rounded-full bg-gray-100 text-gray-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-3 text-sm text-gray-600">
+        <p><strong class="text-gray-900">Иман кафе</strong> — свежий фастфуд, сочный шашлык, горячая пицца и роллы каждый день.</p>
+        <div class="p-3 bg-gray-50 rounded-2xl space-y-1.5 text-xs">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Режим работы:</span>
+            <span class="font-semibold text-gray-900">10:00 — 23:00</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Wi-Fi пароль:</span>
+            <span class="font-semibold text-gray-900">iman2026</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Халяль:</span>
+            <span class="font-semibold text-emerald-700">100% Халал мясо</span>
+          </div>
+        </div>
+        <!-- Блок разработчика для презентации -->
+        <div class="pt-3 border-t border-gray-100">
+          <p class="text-[11px] text-gray-400 mb-2">Разработка интерактивных QR-меню для кафе и ресторанов:</p>
+          <a 
+            href="https://wa.me/996556655995?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%98%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D1%83%D0%B5%D1%82%20%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5%20QR-%D0%BC%D0%B5%D0%BD%D1%8E." 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full py-2.5 px-3 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition"
+          >
+            <span>Связаться в WhatsApp: +996 556 655 995</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Всплывающее уведомление (Toast) вместо alert() -->
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200">
+    Сообщение
+  </div>
+
+  <!-- ==================== СКРИПТ ДАННЫХ И ЛОГИКИ ==================== -->
+  <script>
+    /**
+     * ============================================================================
+     * ИНСТРУКЦИЯ: КАК ЛЕГКО ДОБАВЛЯТЬ ИЛИ РЕДАКТИРОВАТЬ БЛЮДА И КАТЕГОРИИ
+     * ============================================================================
+     * 1. Чтобы добавить новую категорию (например, "Десерты"):
+     *    Добавьте строку в массив CATEGORIES ниже, например:
+     *    { id: 'desserts', name: 'Десерты' }
+     *
+     * 2. Чтобы добавить новое блюдо:
+     *    Скопируйте любой блок внутри массива MENU_ITEMS и вставьте его в конец списка.
+     *    - id: уникальный номер (просто +1 к последнему)
+     *    - category: должен совпадать с 'id' из списка CATEGORIES (например, 'burgers')
+     *    - name: название блюда
+     *    - description: состав и вес
+     *    - price: цена числом (в сомах)
+     *    - image: ссылка на фото (можно указать ссылку из интернета или путь к файлу, например 'images/burger.jpg')
+     *    - badge: необязательная метка (например, 'Хит', 'Острое', 'Новинка' или null)
+     * ============================================================================
+     */
+
+    // Настройки заведения (укажите номер WhatsApp для приема заказов в формате 996XXXXXXXXX)
+    const CAFE_CONFIG = {
+      name: 'Иман кафе',
+      whatsappPhone: '996556655995', // Номер для демонстрации работы заказов в WhatsApp
+      currency: 'сом'
+    };
+
+    // Список категорий меню
+    const CATEGORIES = [
+      { id: 'all', name: 'Все' },
+      { id: 'burgers', name: 'Бургеры' },
+      { id: 'shawarma', name: 'Шаурма' },
+      { id: 'pizza', name: 'Пицца' },
+      { id: 'sushi', name: 'Суши и Роллы' },
+      { id: 'shashlik', name: 'Шашлык' },
+      { id: 'drinks', name: 'Напитки' }
+    ];
+
+    // База всех блюд (легко расширяется добавлением новых объектов)
+    const MENU_ITEMS = [
+      // --- БУРГЕРЫ ---
+      {
+        id: 1,
+        category: 'burgers',
+        name: 'Классический говяжий бургер',
+        description: 'Сочная котлета из 100% говядины, свежие томаты, маринованные огурчики, салат айсберг, фирменный соус • 280 г',
+        price: 240,
+        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+        badge: 'Хит'
+      },
+      {
+        id: 2,
+        category: 'burgers',
+        name: 'Чизбургер делюкс',
+        description: 'Говяжья котлета на гриле, двойной плавленый сыр чеддер, карамелизированный лук, соус гриль • 310 г',
+        price: 270,
+        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 3,
+        category: 'burgers',
+        name: 'Двойной Иман бургер',
+        description: 'Две большие говяжьи котлеты, два ломтика сыра, хрустящий лук, свежие овощи и фирменный соус шефа • 420 г',
+        price: 360,
+        image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80',
+        badge: 'Сытно'
+      },
+
+      // --- ШАУРМА ---
+      {
+        id: 4,
+        category: 'shawarma',
+        name: 'Шаурма классическая куриная',
+        description: 'Нежное филе курицы с вертела, свежая капуста, огурцы, помидоры, чесночный и томатный соусы в тонком лаваше • 350 г',
+        price: 190,
+        image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80',
+        badge: 'Хит'
+      },
+      {
+        id: 5,
+        category: 'shawarma',
+        name: 'Шаурма в сырном лаваше',
+        description: 'Ароматный сырный лаваш, жареная курочка, картофель фри внутри, свежие овощи и двойной сырный соус • 380 г',
+        price: 220,
+        image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 6,
+        category: 'shawarma',
+        name: 'Шаурма с говядиной',
+        description: 'Сочная рубленая говядина со специями, маринованный красный лук, свежие томаты, зелень и фирменный соус • 370 г',
+        price: 250,
+        image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+
+      // --- ПИЦЦА ---
+      {
+        id: 7,
+        category: 'pizza',
+        name: 'Пепперони 32 см',
+        description: 'Тонкое хрустящее тесто, тянущийся сыр моцарелла, пикантные колбаски пепперони (халяль), томатный соус • 580 г',
+        price: 490,
+        image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80',
+        badge: 'Хит'
+      },
+      {
+        id: 8,
+        category: 'pizza',
+        name: 'Маргарита',
+        description: 'Классическая итальянская рецептура: сливочная моцарелла, спелые томаты, ароматный базилик и оливковое масло • 520 г',
+        price: 390,
+        image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 9,
+        category: 'pizza',
+        name: 'Мясная ассорти',
+        description: 'Говядина, копченая куриная грудка, пепперони, болгарский перец, красный лук, моцарелла и соус барбекю • 660 г',
+        price: 560,
+        image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80',
+        badge: 'Выбор шефа'
+      },
+
+      // --- СУШИ И РОЛЛЫ ---
+      {
+        id: 10,
+        category: 'sushi',
+        name: 'Филадельфия классик',
+        description: 'Нежный охлажденный лосось, сливочный сыр креметте, свежий огурец, рис, нори (8 шт.) • 260 г',
+        price: 450,
+        image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
+        badge: 'Хит'
+      },
+      {
+        id: 11,
+        category: 'sushi',
+        name: 'Калифорния',
+        description: 'Снежный краб, спелый авокадо, хрустящий огурец, икра тобико, японский майонез (8 шт.) • 230 г',
+        price: 340,
+        image: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 12,
+        category: 'sushi',
+        name: 'Запеченный ролл с курицей',
+        description: 'Копченая курица, сливочный сыр, огурец под нежной сырно-чесночной шапочкой и соусом унаги (8 шт.) • 280 г',
+        price: 360,
+        image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=600&q=80',
+        badge: 'Горячий'
+      },
+
+      // --- ШАШЛЫК ---
+      {
+        id: 13,
+        category: 'shashlik',
+        name: 'Шашлык из баранины',
+        description: 'Отборная мякоть молодой баранины, замаринованная по фирменному рецепту, подается с маринованным луком и лавашем • 220 г',
+        price: 350,
+        image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        badge: 'На углях'
+      },
+      {
+        id: 14,
+        category: 'shashlik',
+        name: 'Люля-кебаб',
+        description: 'Сочный рубленый кебаб из говядины и баранины со специями, подается на тонком лаваше с красным соусом • 200 г',
+        price: 260,
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 15,
+        category: 'shashlik',
+        name: 'Куриные крылышки на мангале',
+        description: 'Румяные куриные крылышки с хрустящей корочкой и ароматом дымка, подаются с чесночным соусом • 250 г',
+        price: 230,
+        image: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+
+      // --- НАПИТКИ ---
+      {
+        id: 16,
+        category: 'drinks',
+        name: 'Домашний лимонад',
+        description: 'Освежающий цитрусовый лимонад со свежей мятой, лимоном и льдом • 400 мл',
+        price: 120,
+        image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80',
+        badge: 'Свежий'
+      },
+      {
+        id: 17,
+        category: 'drinks',
+        name: 'Айран',
+        description: 'Традиционный охлажденный кисломолочный напиток, идеально дополняет шашлык и шаурму • 300 мл',
+        price: 70,
+        image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 18,
+        category: 'drinks',
+        name: 'Кола 0.5л',
+        description: 'Сильногазированный освежающий напиток в бутылке • 500 мл',
+        price: 85,
+        image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      },
+      {
+        id: 19,
+        category: 'drinks',
+        name: 'Чай с лимоном',
+        description: 'Ароматный черный или зеленый листовой чай с долькой свежего лимона • 500 мл (чайник)',
+        price: 90,
+        image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80',
+        badge: null
+      }
+    ];
+
+    // ==================== СОСТОЯНИЕ ПРИЛОЖЕНИЯ ====================
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let cart = {}; // Формат: { itemId: quantity }
+    let orderFormat = 'table'; // 'table' или 'takeaway'
+
+    // ==================== DOM ЭЛЕМЕНТЫ ====================
+    const categoryTabsEl = document.getElementById('categoryTabs');
+    const menuGridEl = document.getElementById('menuGrid');
+    const currentCategoryTitleEl = document.getElementById('currentCategoryTitle');
+    const itemsCountLabelEl = document.getElementById('itemsCountLabel');
+    const emptyStateEl = document.getElementById('emptyState');
+    const searchInputEl = document.getElementById('searchInput');
+    const clearSearchBtnEl = document.getElementById('clearSearchBtn');
+    const resetFiltersBtnEl = document.getElementById('resetFiltersBtn');
+
+    // Корзина и модальные окна
+    const floatingCartBarEl = document.getElementById('floatingCartBar');
+    const cartBadgeCountEl = document.getElementById('cartBadgeCount');
+    const cartTotalBarEl = document.getElementById('cartTotalBar');
+    const openCartBtnEl = document.getElementById('openCartBtn');
+    const cartModalEl = document.getElementById('cartModal');
+    const cartBackdropEl = document.getElementById('cartBackdrop');
+    const closeCartBtnEl = document.getElementById('closeCartBtn');
+    const clearCartBtnEl = document.getElementById('clearCartBtn');
+    const cartItemsContainerEl = document.getElementById('cartItemsContainer');
+    const modalTotalSumEl = document.getElementById('modalTotalSum');
+
+    // Опции заказа
+    const orderTypeTableEl = document.getElementById('orderTypeTable');
+    const orderTypeTakeawayEl = document.getElementById('orderTypeTakeaway');
+    const tableInputWrapperEl = document.getElementById('tableInputWrapper');
+    const tableNumberInputEl = document.getElementById('tableNumberInput');
+    const showWaiterBtnEl = document.getElementById('showWaiterBtn');
+    const sendWhatsappBtnEl = document.getElementById('sendWhatsappBtn');
+
+    // Экран официанта и инфо
+    const waiterScreenModalEl = document.getElementById('waiterScreenModal');
+    const closeWaiterScreenBtnEl = document.getElementById('closeWaiterScreenBtn');
+    const doneWaiterScreenBtnEl = document.getElementById('doneWaiterScreenBtn');
+    const waiterOrderLocationEl = document.getElementById('waiterOrderLocation');
+    const waiterOrderListEl = document.getElementById('waiterOrderList');
+    const waiterOrderTotalEl = document.getElementById('waiterOrderTotal');
+
+    const infoBtnEl = document.getElementById('infoBtn');
+    const infoModalEl = document.getElementById('infoModal');
+    const infoBackdropEl = document.getElementById('infoBackdrop');
+    const closeInfoBtnEl = document.getElementById('closeInfoBtn');
+    const toastEl = document.getElementById('toast');
+
+    // ==================== ФУНКЦИИ РЕНДЕРИНГА ====================
+
+    // Показ легкого уведомления (вместо alert)
+    let toastTimeout;
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.remove('opacity-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    // Рендер вкладок категорий
+    function renderCategoryTabs() {
+      categoryTabsEl.innerHTML = CATEGORIES.map(cat => {
+        const isActive = cat.id === activeCategory;
+        const activeClasses = isActive
+          ? 'bg-gray-900 text-white shadow-xs'
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200/70 hover:text-gray-900';
+        return `
+          <button 
+            type="button" 
+            data-category="${cat.id}" 
+            class="category-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition active:scale-95 ${activeClasses}"
+          >
+            ${cat.name}
+          </button>
+        `;
+      }).join('');
+
+      // Вешаем обработчики клика на категории
+      document.querySelectorAll('.category-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCategory = btn.dataset.category;
+          renderCategoryTabs();
+          renderMenu();
+          // Плавная прокрутка вкладки в центр экрана на мобильных
+          btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        });
+      });
+    }
+
+    // Фильтрация и рендер карточек блюд
+    function renderMenu() {
+      const query = searchQuery.trim().toLowerCase();
+
+      const filteredItems = MENU_ITEMS.filter(item => {
+        const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
+        const matchesSearch = !query || 
+          item.name.toLowerCase().includes(query) || 
+          item.description.toLowerCase().includes(query);
+        return matchesCategory && matchesSearch;
+      });
+
+      // Обновляем заголовок и счетчик
+      const currentCatObj = CATEGORIES.find(c => c.id === activeCategory);
+      currentCategoryTitleEl.textContent = query 
+        ? `Результаты поиска: «${searchQuery}»` 
+        : (activeCategory === 'all' ? 'Все блюда' : currentCatObj.name);
+      
+      itemsCountLabelEl.textContent = `${filteredItems.length} поз.`;
+
+      if (filteredItems.length === 0) {
+        menuGridEl.innerHTML = '';
+        emptyStateEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyStateEl.classList.add('hidden');
+
+      menuGridEl.innerHTML = filteredItems.map(item => {
+        const qty = cart[item.id] || 0;
+        const badgeHtml = item.badge 
+          ? `<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/95 backdrop-blur-xs text-gray-900 shadow-xs">${item.badge}</span>` 
+          : '';
+
+        // Кнопка добавления или счетчик +/-
+        const actionControls = qty === 0
+          ? `<button 
+               type="button" 
+               onclick="updateQuantity(${item.id}, 1)" 
+               class="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-amber-500 hover:text-gray-950 text-gray-900 font-bold text-xs sm:text-sm transition flex items-center gap-1 active:scale-95"
+             >
+               <span>+</span>
+               <span>Добавить</span>
+             </button>`
+          : `<div class="flex items-center gap-2 bg-gray-900 text-white rounded-xl p-1">
+               <button 
+                 type="button" 
+                 onclick="updateQuantity(${item.id}, -1)" 
+                 class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-700 font-bold text-base transition active:scale-90"
+                 aria-label="Уменьшить"
+               >−</button>
+               <span class="text-xs sm:text-sm font-bold min-w-[18px] text-center">${qty}</span>
+               <button 
+                 type="button" 
+                 onclick="updateQuantity(${item.id}, 1)" 
+                 class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-700 font-bold text-base transition active:scale-90"
+                 aria-label="Увеличить"
+               >+</button>
+             </div>`;
+
+        return `
+          <article class="bg-white rounded-2xl border border-gray-100 shadow-xs hover:shadow-md transition-shadow overflow-hidden flex flex-row sm:flex-col animate-fade-in">
+            <!-- Изображение блюда с ленивой загрузкой и красивым фолбэком -->
+            <div class="relative w-32 sm:w-full h-auto sm:h-48 shrink-0 bg-gradient-to-br from-amber-50 to-orange-100 overflow-hidden">
+              ${badgeHtml}
+              <img 
+                src="${item.image}" 
+                alt="${item.name}" 
+                loading="lazy"
+                onerror="this.onerror=null; this.src='https://placehold.co/600x400/FEF3C7/92400E?text=Иман+кафе';"
+                class="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
+              >
+            </div>
+
+            <!-- Контент карточки -->
+            <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-bold text-gray-900 text-sm sm:text-base leading-snug">${item.name}</h3>
+                <p class="text-xs text-gray-500 mt-1 line-clamp-2 sm:line-clamp-3 leading-relaxed">${item.description}</p>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 mt-3.5 pt-2.5 border-t border-gray-50">
+                <div class="font-extrabold text-gray-900 text-base sm:text-lg">
+                  ${item.price} <span class="text-xs font-semibold text-gray-500">${CAFE_CONFIG.currency}</span>
+                </div>
+                ${actionControls}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Изменение количества блюда в корзине
+    window.updateQuantity = function(itemId, delta) {
+      const currentQty = cart[itemId] || 0;
+      const newQty = currentQty + delta;
+
+      if (newQty <= 0) {
+        delete cart[itemId];
+      } else {
+        cart[itemId] = newQty;
+        if (currentQty === 0) {
+          const item = MENU_ITEMS.find(i => i.id === itemId);
+          if (item) showToast(`Добавлено: ${item.name}`);
+        }
+      }
+
+      renderMenu();
+      updateCartUI();
+    };
+
+    // Расчет итогов и обновление плавающей панели + модального окна корзины
+    function updateCartUI() {
+      let totalCount = 0;
+      let totalSum = 0;
+
+      Object.entries(cart).forEach(([id, qty]) => {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        if (item) {
+          totalCount += qty;
+          totalSum += item.price * qty;
+        }
+      });
+
+      // Плавающая нижняя кнопка
+      if (totalCount > 0) {
+        floatingCartBarEl.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+        cartBadgeCountEl.textContent = totalCount;
+        cartTotalBarEl.textContent = `${totalSum} ${CAFE_CONFIG.currency}`;
+      } else {
+        floatingCartBarEl.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
+        closeCartModal();
+      }
+
+      modalTotalSumEl.textContent = `${totalSum} ${CAFE_CONFIG.currency}`;
+      renderCartItems();
+    }
+
+    // Рендер позиций внутри модального окна корзины
+    function renderCartItems() {
+      const entries = Object.entries(cart);
+      if (entries.length === 0) {
+        cartItemsContainerEl.innerHTML = `<p class="text-center text-sm text-gray-400 py-8">Корзина пуста</p>`;
+        return;
+      }
+
+      cartItemsContainerEl.innerHTML = entries.map(([id, qty]) => {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        if (!item) return '';
+        return `
+          <div class="flex items-center justify-between gap-3 bg-gray-50/70 p-2.5 rounded-2xl border border-gray-100">
+            <img 
+              src="${item.image}" 
+              alt="${item.name}" 
+              onerror="this.onerror=null; this.src='https://placehold.co/100x100/FEF3C7/92400E?text=Блюдо';"
+              class="w-14 h-14 rounded-xl object-cover shrink-0"
+            >
+            <div class="flex-1 min-w-0">
+              <h4 class="text-sm font-bold text-gray-900 truncate">${item.name}</h4>
+              <p class="text-xs font-semibold text-gray-500 mt-0.5">${item.price * qty} ${CAFE_CONFIG.currency}</p>
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1 shrink-0">
+              <button type="button" onclick="updateQuantity(${item.id}, -1)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 font-bold text-gray-700">−</button>
+              <span class="text-xs font-bold min-w-[16px] text-center">${qty}</span>
+              <button type="button" onclick="updateQuantity(${item.id}, 1)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 font-bold text-gray-700">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Управление модальными окнами
+    function openCartModal() {
+      cartModalEl.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCartModal() {
+      cartModalEl.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Переключение формата заказа ("В зале" / "С собой")
+    function setOrderFormat(format) {
+      orderFormat = format;
+      if (format === 'table') {
+        orderTypeTableEl.className = 'py-2 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-xs transition';
+        orderTypeTakeawayEl.className = 'py-2 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900 transition';
+        tableInputWrapperEl.classList.remove('hidden');
+      } else {
+        orderTypeTakeawayEl.className = 'py-2 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-xs transition';
+        orderTypeTableEl.className = 'py-2 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900 transition';
+        tableInputWrapperEl.classList.add('hidden');
+      }
+    }
+
+    // Генерация текстовой сводки заказа
+    function buildOrderSummary() {
+      let totalSum = 0;
+      const lines = [];
+
+      Object.entries(cart).forEach(([id, qty], index) => {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        if (item) {
+          const itemTotal = item.price * qty;
+          totalSum += itemTotal;
+          lines.push({
+            index: index + 1,
+            name: item.name,
+            qty,
+            price: item.price,
+            itemTotal
+          });
+        }
+      });
+
+      const tableNum = tableNumberInputEl.value.trim();
+      const locationText = orderFormat === 'takeaway'
+        ? 'С собой (на вынос)'
+        : (tableNum ? `В зале — Столик №${tableNum}` : 'В зале (столик не указан)');
+
+      return { lines, totalSum, locationText };
+    }
+
+    // Показать экран для официанта
+    function openWaiterScreen() {
+      const { lines, totalSum, locationText } = buildOrderSummary();
+      if (lines.length === 0) return;
+
+      waiterOrderLocationEl.textContent = locationText;
+      waiterOrderTotalEl.textContent = `${totalSum} ${CAFE_CONFIG.currency}`;
+
+      waiterOrderListEl.innerHTML = lines.map(line => `
+        <div class="py-3 flex items-center justify-between gap-3">
+          <div>
+            <span class="font-bold text-gray-900 text-sm">${line.name}</span>
+            <div class="text-xs text-gray-500">${line.qty} шт. × ${line.price} ${CAFE_CONFIG.currency}</div>
+          </div>
+          <span class="font-extrabold text-gray-900 text-sm shrink-0">${line.itemTotal} ${CAFE_CONFIG.currency}</span>
+        </div>
+      `).join('');
+
+      closeCartModal();
+      waiterScreenModalEl.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Отправка заказа в WhatsApp
+    function sendOrderToWhatsApp() {
+      const { lines, totalSum, locationText } = buildOrderSummary();
+      if (lines.length === 0) return;
+
+      let message = `Здравствуйте! Новый заказ в *${CAFE_CONFIG.name}*:\n`;
+      message += `📍 *Формат:* ${locationText}\n\n`;
+      lines.forEach(l => {
+        message += `${l.index}. ${l.name} — ${l.qty} шт. (${l.itemTotal} ${CAFE_CONFIG.currency})\n`;
+      });
+      message += `\n💰 *Итого: ${totalSum} ${CAFE_CONFIG.currency}*`;
+
+      const encodedText = encodeURIComponent(message);
+      const waUrl = `https://wa.me/${CAFE_CONFIG.whatsappPhone}?text=${encodedText}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+    searchInputEl.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      clearSearchBtnEl.classList.toggle('hidden', searchQuery.length === 0);
+      renderMenu();
+    });
+
+    clearSearchBtnEl.addEventListener('click', () => {
+      searchQuery = '';
+      searchInputEl.value = '';
+      clearSearchBtnEl.classList.add('hidden');
+      renderMenu();
+    });
+
+    resetFiltersBtnEl.addEventListener('click', () => {
+      activeCategory = 'all';
+      searchQuery = '';
+      searchInputEl.value = '';
+      clearSearchBtnEl.classList.add('hidden');
+      renderCategoryTabs();
+      renderMenu();
+    });
+
+    openCartBtnEl.addEventListener('click', openCartModal);
+    closeCartBtnEl.addEventListener('click', closeCartModal);
+    cartBackdropEl.addEventListener('click', closeCartModal);
+
+    clearCartBtnEl.addEventListener('click', () => {
+      cart = {};
+      renderMenu();
+      updateCartUI();
+      showToast('Корзина очищена');
+    });
+
+    orderTypeTableEl.addEventListener('click', () => setOrderFormat('table'));
+    orderTypeTakeawayEl.addEventListener('click', () => setOrderFormat('takeaway'));
+
+    showWaiterBtnEl.addEventListener('click', openWaiterScreen);
+    sendWhatsappBtnEl.addEventListener('click', sendOrderToWhatsApp);
+
+    const closeWaiterScreen = () => {
+      waiterScreenModalEl.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+    closeWaiterScreenBtnEl.addEventListener('click', closeWaiterScreen);
+    doneWaiterScreenBtnEl.addEventListener('click', closeWaiterScreen);
+
+    // Модальное окно информации
+    infoBtnEl.addEventListener('click', () => infoModalEl.classList.remove('hidden'));
+    closeInfoBtnEl.addEventListener('click', () => infoModalEl.classList.add('hidden'));
+    infoBackdropEl.addEventListener('click', () => infoModalEl.classList.add('hidden'));
+
+    // Закрытие верхнего демо-баннера (если нужно показать чистый вид без рекламы)
+    const demoBannerEl = document.getElementById('demoBanner');
+    const closeDemoBannerBtnEl = document.getElementById('closeDemoBannerBtn');
+    if (closeDemoBannerBtnEl && demoBannerEl) {
+      closeDemoBannerBtnEl.addEventListener('click', () => {
+        demoBannerEl.classList.add('hidden');
+      });
+    }
+
+    // Инициализация при загрузке
+    renderCategoryTabs();
+    renderMenu();
+  </script>
+</body>
+</html>
