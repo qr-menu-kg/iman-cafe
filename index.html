@@ -38,7 +38,7 @@
   <!-- ==================== ШАПКА САЙТА (STICKY) ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
     <div class="max-w-5xl mx-auto px-4 pt-3.5 pb-2.5">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-2.5">
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Иман кафе</h1>
@@ -53,6 +53,18 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
+        </button>
+      </div>
+
+      <!-- БЫСТРЫЕ КНОПКИ СЕРВИСА (Вызов официанта / Счет) -->
+      <div class="grid grid-cols-2 gap-2 mb-2.5">
+        <button id="callWaiterBtn" type="button" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 active:scale-98 text-gray-800 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-gray-200/60">
+          <span>🛎</span>
+          <span>Позвать официанта</span>
+        </button>
+        <button id="askBillBtn" type="button" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 active:scale-98 text-gray-800 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-gray-200/60">
+          <span>💳</span>
+          <span>Попросить счет</span>
         </button>
       </div>
 
@@ -315,6 +327,9 @@
     const successTableTextEl = document.getElementById('successTableText');
     const newOrderBtnEl = document.getElementById('newOrderBtn');
 
+    const callWaiterBtnEl = document.getElementById('callWaiterBtn');
+    const askBillBtnEl = document.getElementById('askBillBtn');
+
     const infoBtnEl = document.getElementById('infoBtn');
     const infoModalEl = document.getElementById('infoModal');
     const infoBackdropEl = document.getElementById('infoBackdrop');
@@ -548,7 +563,8 @@
         table: tableNum,
         items: orderItems,
         total: totalPrice,
-        status: 'new', // new, cooking, ready
+        type: 'order',
+        status: 'new',
         timestamp: Date.now(),
         timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -579,6 +595,36 @@
         `;
       }
     }
+
+    // Отправка сервисного запроса (Вызов официанта / Счет)
+    async function sendServiceRequest(serviceType, titleText) {
+      const serviceData = {
+        table: tableNum,
+        type: 'service',
+        serviceTitle: titleText,
+        total: 0,
+        items: [],
+        status: 'new',
+        timestamp: Date.now(),
+        timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      try {
+        await push(ref(db, 'orders'), serviceData);
+        showToast(`✅ ${titleText} отправлен! Официант скоро подойдет.`);
+      } catch (err) {
+        console.error(err);
+        showToast('Ошибка отправки запроса.');
+      }
+    }
+
+    callWaiterBtnEl.addEventListener('click', () => {
+      sendServiceRequest('waiter', '🛎 Вызов официанта');
+    });
+
+    askBillBtnEl.addEventListener('click', () => {
+      sendServiceRequest('bill', '💳 Запросили счёт');
+    });
 
     openCartBtnEl.addEventListener('click', openCartModal);
     closeCartBtnEl.addEventListener('click', closeCartModal);
