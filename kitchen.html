@@ -50,7 +50,7 @@
       <svg class="w-16 h-16 mx-auto mb-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
       </svg>
-      <h3 class="text-lg font-bold text-gray-400">Все заказы выполнены!</h3>
+      <h3 class="text-lg font-bold text-gray-400">Нет активных задач</h3>
       <p class="text-xs mt-1 text-gray-500">Ожидаем новые заказы и вызовы со столиков...</p>
     </div>
   </main>
@@ -94,7 +94,7 @@
     let audioAllowed = false;
     let currentTab = 'active'; 
     let ordersCache = {};
-    let previousOrdersCount = 0;
+    let previousOrdersCount = -1; // Исправлено для точного отлова первого звука
 
     enableAudioBtn.addEventListener('click', () => {
       audioAllowed = !audioAllowed;
@@ -164,14 +164,19 @@
       ordersCache = data || {};
 
       const ordersList = Object.entries(ordersCache);
+      // Активными считаем заказы со статусом new/cooking ИЛИ любые сервисные запросы со статусом new
       const activeCount = ordersList.filter(([_, o]) => o.status === 'new' || o.status === 'cooking').length;
       countActiveEl.textContent = activeCount;
 
       const newOrdersCount = ordersList.filter(([_, o]) => o.status === 'new').length;
-      if (newOrdersCount > previousOrdersCount && previousOrdersCount !== -1) {
+      if (previousOrdersCount !== -1 && newOrdersCount > previousOrdersCount) {
         playBeep();
       }
-      previousOrdersCount = newOrdersCount;
+      if (previousOrdersCount === -1) {
+        previousOrdersCount = newOrdersCount; // инициализация при первой загрузке
+      } else {
+        previousOrdersCount = newOrdersCount;
+      }
 
       renderOrders();
     });
@@ -193,9 +198,11 @@
       let orders = Object.entries(data).map(([id, val]) => ({ id, ...val }));
       
       if (currentTab === 'active') {
+        // На вкладке Активные показываем заказы еды (new, cooking) и ВСЕ новые сервисные запросы
         orders = orders.filter(o => o.status === 'new' || o.status === 'cooking');
       } else {
-        orders = orders.filter(o => o.status === 'ready');
+        // В истории только выданные заказы еды (сервисные вызовы сюда не попадают)
+        orders = orders.filter(o => o.status === 'ready' && o.type !== 'service');
       }
 
       orders.sort((a, b) => b.timestamp - a.timestamp);
@@ -215,7 +222,7 @@
         const secs = elapsedSeconds % 60;
         const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-        // Если это сервисный запрос (вызов официанта или счет)
+        // Сервисный запрос (вызов официанта или счёт)
         if (order.type === 'service') {
           return `
             <div class="order-card border-2 border-purple-500 bg-purple-950/40 rounded-3xl p-5 flex flex-col justify-between shadow-xl ring-4 ring-purple-500/20">
@@ -231,13 +238,16 @@
 
                 <div class="my-4 p-4 bg-purple-900/50 border border-purple-500/40 rounded-2xl text-center">
                   <p class="text-lg font-black text-white">${order.serviceTitle}</p>
-                  <p class="text-xs text-purple-200 mt-1">Требуется срочное внимание официанта в зале!</p>
+                  <p class="text-xs text-purple-200 mt-1">Требуется внимание официанта в зале!</p>
                 </div>
               </div>
 
-              <div>
-                <button onclick="updateStatus('${order.id}', 'ready')" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-purple-600/30">
-                  ✔️ Выполнено / Закрыть
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="deleteOrder('${order.id}')" class="py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs rounded-xl transition">
+                  🗑 Удалить
+                </button>
+                <button onclick="deleteOrder('${order.id}')" class="py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-purple-600/30">
+                  ✔️ Закрыть
                 </button>
               </div>
             </div>
@@ -330,7 +340,7 @@
     }
 
     window.deleteOrder = async function(orderId) {
-      if (confirm('Удалить этот заказ из архива?')) {
+      if (confirm('Удалить эту задачу?')) {
         await remove(ref(db, `orders/${orderId}`));
       }
     }
