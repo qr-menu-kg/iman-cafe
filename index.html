@@ -236,14 +236,14 @@
   </div>
 
   <!-- Всплывающее уведомление -->
-  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200">
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 text-center max-w-xs">
     Сообщение
   </div>
 
   <!-- ==================== СКРИПТЫ FIREBASE И ЛОГИКА МЕНЮ ==================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
+    import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBohllCT8Jzt23W3kcjRt8n-yOUWZEfxcU",
@@ -259,12 +259,19 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // Генерация или получение постоянного ID телефона гостя (Цифровой отпечаток устройства)
+    let deviceId = localStorage.getItem('iman_device_id');
+    if (!deviceId) {
+      deviceId = String(Math.floor(1000 + Math.random() * 9000)); // 4-значный код, например 4812
+      localStorage.setItem('iman_device_id', deviceId);
+    }
+
     // Автоопределение столика из URL (например, ?table=5)
     const urlParams = new URLSearchParams(window.location.search);
     const tableNum = urlParams.get('table') || '1';
 
-    document.getElementById('tableIndicatorText').textContent = `Ваш столик: №${tableNum}`;
-    document.getElementById('modalTableSubtitle').textContent = `Столик №${tableNum}`;
+    document.getElementById('tableIndicatorText').textContent = `Ваш столик: №${tableNum} • ID #${deviceId}`;
+    document.getElementById('modalTableSubtitle').textContent = `Столик №${tableNum} (Гость #${deviceId})`;
 
     const CATEGORIES = [
       { id: 'all', name: 'Все' },
@@ -343,7 +350,17 @@
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         toastEl.classList.add('opacity-0');
-      }, 2200);
+      }, 2800);
+    }
+
+    // Проверка, не заблокировано ли устройство администратором
+    async function isDeviceBanned() {
+      try {
+        const snap = await get(ref(db, `banned_devices/${deviceId}`));
+        return snap.exists() && snap.val() === true;
+      } catch (e) {
+        return false;
+      }
     }
 
     function renderCategoryTabs() {
@@ -542,10 +559,20 @@
       cartModalEl.classList.add('hidden');
     }
 
-    // Отправка заказа в Firebase
+    // Отправка заказа в Firebase с меткой устройства
     async function sendOrderToKitchen() {
       const entries = Object.entries(cart);
       if (entries.length === 0) return;
+
+      sendOrderBtnEl.disabled = true;
+      sendOrderBtnEl.textContent = 'Проверка...';
+
+      if (await isDeviceBanned()) {
+        showToast('⛔ Отправка заказов с этого устройства ограничена администратором.');
+        sendOrderBtnEl.disabled = false;
+        sendOrderBtnEl.textContent = 'Отправить заказ на кухню';
+        return;
+      }
 
       let totalPrice = 0;
       const orderItems = entries.map(([id, qty]) => {
@@ -561,6 +588,7 @@
 
       const orderData = {
         table: tableNum,
+        deviceId: deviceId,
         items: orderItems,
         total: totalPrice,
         type: 'order',
@@ -570,9 +598,7 @@
       };
 
       try {
-        sendOrderBtnEl.disabled = true;
         sendOrderBtnEl.textContent = 'Отправка...';
-        
         await push(ref(db, 'orders'), orderData);
 
         cart = {};
@@ -598,8 +624,14 @@
 
     // Отправка сервисного запроса (Вызов официанта / Счет)
     async function sendServiceRequest(serviceType, titleText) {
+      if (await isDeviceBanned()) {
+        showToast('⛔ Действие ограничено администратором.');
+        return;
+      }
+
       const serviceData = {
         table: tableNum,
+        deviceId: deviceId,
         type: 'service',
         serviceTitle: titleText,
         total: 0,
