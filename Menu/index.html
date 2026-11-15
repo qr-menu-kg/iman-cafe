@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Демо Кафе — Меню</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #111827; -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-500 selection:text-white pb-28">
+
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs">
+    <div class="max-w-5xl mx-auto px-4 pt-3.5 pb-2.5">
+      <div class="flex items-center justify-between mb-2.5">
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Демо Кафе</h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">Открыто</span>
+          </div>
+          <p id="tableIndicatorText" class="text-xs sm:text-sm text-amber-600 font-semibold mt-0.5">Определение столика...</p>
+        </div>
+        <button id="infoBtn" type="button" class="p-2.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-gray-600 transition active:scale-95">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mb-2.5">
+        <button id="callWaiterBtn" type="button" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 active:scale-98 text-gray-800 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-gray-200/60">
+          <span>🛎</span><span>Позвать официанта</span>
+        </button>
+        <button id="askBillBtn" type="button" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 active:scale-98 text-gray-800 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-gray-200/60">
+          <span>💳</span><span>Попросить счет</span>
+        </button>
+      </div>
+
+      <div class="relative mb-2.5">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input type="text" id="searchInput" placeholder="Найти блюдо..." class="w-full pl-10 pr-9 py-2.5 bg-gray-100/80 border border-transparent focus:border-amber-500 focus:bg-white rounded-2xl text-sm text-gray-900 placeholder-gray-400 outline-none transition">
+        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">×</button>
+      </div>
+
+      <nav id="categoryTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"></nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 pt-4">
+    <div class="flex items-center justify-between mb-3.5">
+      <h2 id="currentCategoryTitle" class="text-lg font-bold text-gray-900">Все блюда</h2>
+      <span id="itemsCountLabel" class="text-xs font-medium text-gray-400"></span>
+    </div>
+
+    <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5"></div>
+
+    <div id="emptyState" class="hidden text-center py-16 px-4">
+      <h3 class="text-base font-semibold text-gray-900">Ничего не найдено</h3>
+      <button id="resetFiltersBtn" class="mt-4 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl">Показать всё меню</button>
+    </div>
+  </main>
+
+  <div id="floatingCartBar" class="fixed bottom-4 inset-x-0 z-30 px-4 transition-all duration-300 translate-y-28 opacity-0 pointer-events-none">
+    <div class="max-w-lg mx-auto">
+      <button id="openCartBtn" type="button" class="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-2xl p-3.5 shadow-xl flex items-center justify-between transition">
+        <div class="flex items-center gap-3">
+          <span id="cartBadgeCount" class="bg-amber-500 text-gray-950 font-extrabold text-xs px-2.5 py-1 rounded-xl">0</span>
+          <span class="font-semibold text-sm">Мой заказ</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="cartTotalBar" class="font-bold text-base">0 сом</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div id="cartModal" class="fixed inset-0 z-50 hidden">
+    <div id="cartBackdrop" class="fixed inset-0 bg-black/40"></div>
+    <div class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col pointer-events-auto overflow-hidden animate-fade-in">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">Ваш заказ</h3>
+            <p id="modalTableSubtitle" class="text-xs text-amber-600 font-semibold">Столик № —</p>
+          </div>
+          <button id="closeCartBtn" class="p-2 rounded-full bg-gray-100 text-gray-600">✕</button>
+        </div>
+        <div id="cartItemsContainer" class="p-5 overflow-y-auto space-y-3.5 flex-1"></div>
+        <div class="p-5 bg-gray-50 border-t border-gray-100 space-y-3.5">
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-sm font-medium text-gray-500">Итого:</span>
+            <span id="modalTotalSum" class="text-xl font-extrabold text-gray-900">0 сом</span>
+          </div>
+          <button id="sendOrderBtn" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-2xl transition">Отправить заказ на кухню</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="successScreenModal" class="fixed inset-0 z-50 hidden bg-white flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 text-3xl">✓</div>
+    <h2 class="text-2xl font-extrabold text-gray-900">Заказ успешно принят!</h2>
+    <p id="successTableText" class="text-sm text-gray-600 mt-1">Повар уже готовит.</p>
+    <button id="newOrderBtn" class="mt-8 px-6 py-3 bg-gray-900 text-white font-bold text-sm rounded-2xl">Дозаказать еще</button>
+  </div>
+
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity text-center"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+    import { getDatabase, ref, push, get, onValue } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBohllCT8Jzt23W3kcjRt8n-yOUWZEfxcU",
+      authDomain: "iman-menu.firebaseapp.com",
+      databaseURL: "https://iman-menu-default-rtdb.firebaseio.com",
+      projectId: "iman-menu",
+      storageBucket: "iman-menu.firebasestorage.app",
+      messagingSenderId: "227236434910",
+      appId: "1:227236434910:web:83445bb6325c5cefff834f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let deviceId = localStorage.getItem('demo_device_id');
+    if (!deviceId) {
+      deviceId = String(Math.floor(1000 + Math.random() * 9000));
+      localStorage.setItem('demo_device_id', deviceId);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tableNum = urlParams.get('table') || '1';
+    document.getElementById('tableIndicatorText').textContent = `Ваш столик: №${tableNum} • ID #${deviceId}`;
+    document.getElementById('modalTableSubtitle').textContent = `Столик №${tableNum}`;
+
+    const CATEGORIES = [
+      { id: 'all', name: 'Все' },
+      { id: 'burgers', name: 'Бургеры' },
+      { id: 'shawarma', name: 'Шаурма' },
+      { id: 'pizza', name: 'Пицца' },
+      { id: 'sushi', name: 'Суши и Роллы' },
+      { id: 'shashlik', name: 'Шашлык' },
+      { id: 'drinks', name: 'Напитки' }
+    ];
+
+    let MENU_ITEMS = [
+      { id: 1, category: 'burgers', name: 'Классический говяжий бургер', description: 'Сочная котлета из 100% говядины, томаты, соус • 280 г', price: 240, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
+      { id: 2, category: 'burgers', name: 'Чизбургер делюкс', description: 'Двойной сыр чеддер, говяжья котлета, соус гриль • 310 г', price: 270, image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80', badge: null },
+      { id: 3, category: 'burgers', name: 'Фирменный бургер', description: 'Две котлеты, сыр, хрустящий лук и соус шефа • 420 г', price: 360, image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80', badge: 'Сытно' },
+      { id: 4, category: 'shawarma', name: 'Шаурма классическая куриная', description: 'Филе курицы, капуста, огурцы, соус в лаваше • 350 г', price: 190, image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
+      { id: 5, category: 'pizza', name: 'Пепперони 32 см', description: 'Моцарелла, колбаски пепперони, томатный соус • 580 г', price: 490, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
+      { id: 6, category: 'sushi', name: 'Филадельфия классик', description: 'Лосось, сливочный сыр, огурец, рис (8 шт.) • 260 г', price: 450, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
+      { id: 7, category: 'shashlik', name: 'Шашлык из баранины', description: 'Мякоть молодой баранины на углях, лук, лаваш • 220 г', price: 350, image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', badge: 'На углях' },
+      { id: 8, category: 'drinks', name: 'Домашний лимонад', description: 'Цитрусовый лимонад со свежей мятой и льдом • 400 мл', price: 120, image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80', badge: 'Свежий' },
+      { id: 9, category: 'drinks', name: 'Кола 0.5л', description: 'Освежающий газированный напиток • 500 мл', price: 85, image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80', badge: null }
+    ];
+
+    let stopList = {};
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let cart = {};
+
+    // Загружаем актуальные цены и стоп-лист из базы (если настроено в админке)
+    onValue(ref(db, 'menu_settings'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        if (data.items) MENU_ITEMS = data.items;
+        if (data.stopList) stopList = data.stopList;
+      }
+      renderCategoryTabs();
+      renderMenu();
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('opacity-0');
+      setTimeout(() => t.classList.add('opacity-0'), 2500);
+    }
+
+    async function isBanned() {
+      const snap = await get(ref(db, `banned_devices/${deviceId}`));
+      return snap.exists() && snap.val() === true;
+    }
+
+    function renderCategoryTabs() {
+      document.getElementById('categoryTabs').innerHTML = CATEGORIES.map(cat => `
+        <button type="button" data-category="${cat.id}" class="category-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${cat.id === activeCategory ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}">
+          ${cat.name}
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.category-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCategory = btn.dataset.category;
+          renderCategoryTabs();
+          renderMenu();
+        });
+      });
+    }
+
+    function renderMenu() {
+      const query = searchQuery.toLowerCase();
+      const filtered = MENU_ITEMS.filter(item => {
+        const matchesCat = activeCategory === 'all' || item.category === activeCategory;
+        const matchesSearch = !query || item.name.toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      document.getElementById('itemsCountLabel').textContent = `${filtered.length} поз.`;
+      const grid = document.getElementById('menuGrid');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('emptyState').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('emptyState').classList.add('hidden');
+
+      grid.innerHTML = filtered.map(item => {
+        const isStopped = stopList[item.id] === true;
+        const qty = cart[item.id] || 0;
+
+        return `
+          <div class="bg-white rounded-3xl p-3.5 shadow-xs border border-gray-100 flex flex-col justify-between relative overflow-hidden ${isStopped ? 'opacity-60' : ''}">
+            ${isStopped ? '<div class="absolute inset-0 bg-white/70 backdrop-blur-xs flex items-center justify-center font-black text-red-600 text-sm uppercase z-10">Нет в наличии</div>' : ''}
+            <div>
+              <div class="relative rounded-2xl overflow-hidden aspect-[4/3] bg-gray-100 mb-3">
+                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" loading="lazy">
+              </div>
+              <h3 class="font-bold text-gray-900 text-sm">${item.name}</h3>
+              <p class="text-xs text-gray-500 mt-1 line-clamp-2">${item.description}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+              <span class="font-extrabold text-gray-900">${item.price} сом</span>
+              ${!isStopped ? (qty === 0 ? `
+                <button data-id="${item.id}" class="add-btn px-4 py-2 bg-gray-900 text-white font-semibold text-xs rounded-xl">В корзину</button>
+              ` : `
+                <div class="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                  <button data-id="${item.id}" class="dec-btn w-7 h-7 bg-white rounded-lg font-bold">−</button>
+                  <span class="w-5 text-center font-extrabold text-xs">${qty}</span>
+                  <button data-id="${item.id}" class="inc-btn w-7 h-7 bg-gray-900 text-white rounded-lg font-bold">+</button>
+                </div>
+              `) : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      attachEvents();
+    }
+
+    function attachEvents() {
+      document.querySelectorAll('.add-btn, .inc-btn').forEach(b => b.addEventListener('click', e => {
+        const id = Number(e.currentTarget.dataset.id);
+        cart[id] = (cart[id] || 0) + 1;
+        renderMenu();
+        updateCart();
+      }));
+      document.querySelectorAll('.dec-btn').forEach(b => b.addEventListener('click', e => {
+        const id = Number(e.currentTarget.dataset.id);
+        if (cart[id] > 1) cart[id]--; else delete cart[id];
+        renderMenu();
+        updateCart();
+      }));
+    }
+
+    function updateCart() {
+      const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+      let totalPrice = 0;
+      for (const [id, q] of Object.entries(cart)) {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        if (item) totalPrice += item.price * q;
+      }
+      document.getElementById('cartBadgeCount').textContent = totalItems;
+      document.getElementById('cartTotalBar').textContent = `${totalPrice} сом`;
+
+      const bar = document.getElementById('floatingCartBar');
+      if (totalItems > 0) bar.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+      else { bar.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none'); document.getElementById('cartModal').classList.add('hidden'); }
+    }
+
+    function openCart() {
+      const container = document.getElementById('cartItemsContainer');
+      const entries = Object.entries(cart);
+      if (entries.length === 0) { container.innerHTML = '<p class="text-center text-gray-400 py-6">Корзина пуста</p>'; return; }
+
+      let sum = 0;
+      container.innerHTML = entries.map(([id, q]) => {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        sum += item.price * q;
+        return `<div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl text-sm"><div><b>${item.name}</b><p class="text-xs text-gray-500">${item.price} сом × ${q}</p></div><span class="font-bold">${item.price * q} сом</span></div>`;
+      }).join('');
+      document.getElementById('modalTotalSum').textContent = `${sum} сом`;
+      document.getElementById('cartModal').classList.remove('hidden');
+    }
+
+    async function sendOrder() {
+      if (await isBanned()) { showToast('⛔ Устройство заблокировано.'); return; }
+      const entries = Object.entries(cart);
+      if (entries.length === 0) return;
+
+      let total = 0;
+      const items = entries.map(([id, q]) => {
+        const item = MENU_ITEMS.find(i => i.id === Number(id));
+        total += item.price * q;
+        return { name: item.name, price: item.price, quantity: q, subtotal: item.price * q };
+      });
+
+      await push(ref(db, 'orders'), {
+        table: tableNum, deviceId, items, total, type: 'order', status: 'new',
+        timestamp: Date.now(), timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      cart = {};
+      renderMenu();
+      updateCart();
+      document.getElementById('cartModal').classList.add('hidden');
+      document.getElementById('successScreenModal').classList.remove('hidden');
+    }
+
+    document.getElementById('openCartBtn').addEventListener('click', openCart);
+    document.getElementById('closeCartBtn').addEventListener('click', () => document.getElementById('cartModal').classList.add('hidden'));
+    document.getElementById('sendOrderBtn').addEventListener('click', sendOrder);
+    document.getElementById('newOrderBtn').addEventListener('click', () => document.getElementById('successScreenModal').classList.add('hidden'));
+    document.getElementById('callWaiterBtn').addEventListener('click', () => push(ref(db, 'orders'), { table: tableNum, deviceId, type: 'service', serviceTitle: '🛎 Вызов официанта', total: 0, items: [], status: 'new', timestamp: Date.now() }));
+    document.getElementById('askBillBtn').addEventListener('click', () => push(ref(db, 'orders'), { table: tableNum, deviceId, type: 'service', serviceTitle: '💳 Запросили счёт', total: 0, items: [], status: 'new', timestamp: Date.now() }));
+    document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; renderMenu(); });
+  </script>
+</body>
+</html>
