@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Иман Кафе — Кухня (KDS Pro)</title>
+  <title>Кухня — KDS Pro (Demo)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -62,7 +62,7 @@
       <span>🟡 3-6 мин (Внимание)</span>
       <span>🔴 > 6 мин (Задержка!)</span>
     </div>
-    <div>Иман Кафе KDS v2.2 • Защита столов включена</div>
+    <div>QR-Menu Demo KDS v2.3 • Защита столов включена</div>
   </footer>
 
   <!-- СКРИПТ ЛОГИКИ КУХНИ -->
@@ -194,14 +194,13 @@
       const now = Date.now();
       const TWO_HOURS = 2 * 60 * 60 * 1000;
 
-      // Группируем устройства, которые делали заказы на каждый стол за последние 2 часа
       const tableFirstDevice = {};
       allOrders
         .filter(o => o.type !== 'service' && (now - o.timestamp) < TWO_HOURS && o.deviceId)
-        .sort((a, b) => a.timestamp - b.timestamp) // от ранних к поздним
+        .sort((a, b) => a.timestamp - b.timestamp)
         .forEach(o => {
           if (!tableFirstDevice[o.table]) {
-            tableFirstDevice[o.table] = o.deviceId; // запоминаем первый телефон за этим столом
+            tableFirstDevice[o.table] = o.deviceId;
           }
         });
 
@@ -286,7 +285,6 @@
 
         if (order.status === 'new') {
           if (isDifferentDevice) {
-            // Если заказ с другого телефона — выделяем яркой желто-оранжевой рамкой
             timerBg = 'bg-amber-500/20 text-amber-300 border-amber-400 animate-pulse';
             cardBorder = 'border-amber-400 bg-gray-900 ring-4 ring-amber-500/25';
           } else if (mins >= 6) {
@@ -306,10 +304,17 @@
           cardBorder = 'border-gray-800 bg-gray-950/50 opacity-80';
         }
 
+        // Отображение цены каждого предмета и его подсумки в списке карточки
         const itemsHtml = order.items.map(i => `
-          <div class="flex justify-between items-center text-sm py-1.5 border-b border-gray-800/60 last:border-0">
-            <span class="font-semibold text-gray-200">${i.name}</span>
-            <span class="bg-gray-800 px-2.5 py-0.5 rounded-lg font-black text-xs text-amber-400">×${i.quantity}</span>
+          <div class="flex justify-between items-center text-xs sm:text-sm py-2 border-b border-gray-800/60 last:border-0 gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-gray-200 truncate">${i.name}</div>
+              <div class="text-[11px] text-gray-400">${i.price} сом × ${i.quantity}</div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="font-bold text-white">${i.subtotal} сом</div>
+              <span class="inline-block mt-0.5 bg-gray-800 px-2 py-0.5 rounded-md font-black text-[10px] text-amber-400">×${i.quantity}</span>
+            </div>
           </div>
         `).join('');
 
