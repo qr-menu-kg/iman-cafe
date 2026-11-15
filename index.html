@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Иман кафе — Меню</title>
+  <title>Демо Кафе — Меню</title>
   <!-- Подключение Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Подключение шрифта Inter -->
@@ -41,7 +41,7 @@
       <div class="flex items-center justify-between mb-2.5">
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Иман кафе</h1>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Демо Кафе</h1>
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
               Открыто
             </span>
@@ -216,7 +216,7 @@
         </button>
       </div>
       <div class="space-y-3 text-sm text-gray-600">
-        <p><strong class="text-gray-900">Иман кафе</strong> — свежий фастфуд, сочный шашлык, горячая пицца и роллы каждый день.</p>
+        <p><strong class="text-gray-900">Демо Кафе</strong> — демонстрационная система электронного меню и KDS.</p>
         <div class="p-3 bg-gray-50 rounded-2xl space-y-1.5 text-xs">
           <div class="flex justify-between">
             <span class="text-gray-500">Режим работы:</span>
@@ -224,11 +224,11 @@
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500">Wi-Fi пароль:</span>
-            <span class="font-semibold text-gray-900">iman2026</span>
+            <span class="font-semibold text-gray-900">demo2026</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Халяль:</span>
-            <span class="font-semibold text-emerald-700">100% Халал мясо</span>
+            <span class="text-gray-500">Качество:</span>
+            <span class="font-semibold text-emerald-700">100% Премиум</span>
           </div>
         </div>
       </div>
@@ -259,14 +259,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Генерация или получение постоянного ID телефона гостя (Цифровой отпечаток устройства)
-    let deviceId = localStorage.getItem('iman_device_id');
+    let deviceId = localStorage.getItem('demo_device_id');
     if (!deviceId) {
-      deviceId = String(Math.floor(1000 + Math.random() * 9000)); // 4-значный код, например 4812
-      localStorage.setItem('iman_device_id', deviceId);
+      deviceId = String(Math.floor(1000 + Math.random() * 9000));
+      localStorage.setItem('demo_device_id', deviceId);
     }
 
-    // Автоопределение столика из URL (например, ?table=5)
     const urlParams = new URLSearchParams(window.location.search);
     const tableNum = urlParams.get('table') || '1';
 
@@ -286,11 +284,11 @@
     const MENU_ITEMS = [
       { id: 1, category: 'burgers', name: 'Классический говяжий бургер', description: 'Сочная котлета из 100% говядины, свежие томаты, маринованные огурчики, салат айсберг, фирменный соус • 280 г', price: 240, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
       { id: 2, category: 'burgers', name: 'Чизбургер делюкс', description: 'Говяжья котлета на гриле, двойной плавленый сыр чеддер, карамелизированный лук, соус гриль • 310 г', price: 270, image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80', badge: null },
-      { id: 3, category: 'burgers', name: 'Двойной Иман бургер', description: 'Две большие говяжьи котлеты, два ломтика сыра, хрустящий лук, свежие овощи и фирменный соус шефа • 420 г', price: 360, image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80', badge: 'Сытно' },
+      { id: 3, category: 'burgers', name: 'Фирменный бургер', description: 'Две большие говяжьи котлеты, два ломтика сыра, хрустящий лук, свежие овощи и фирменный соус шефа • 420 г', price: 360, image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80', badge: 'Сытно' },
       { id: 4, category: 'shawarma', name: 'Шаурма классическая куриная', description: 'Нежное филе курицы с вертела, свежая капуста, огурцы, помидоры, чесночный и томатный соусы в тонком лаваше • 350 г', price: 190, image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
       { id: 5, category: 'shawarma', name: 'Шаурма в сырном лаваше', description: 'Ароматный сырный лаваш, жареная курочка, картофель фри внутри, свежие овощи и двойной сырный соус • 380 г', price: 220, image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80', badge: null },
       { id: 6, category: 'shawarma', name: 'Шаурма с говядиной', description: 'Сочная рубленая говядина со специями, маринованный красный лук, свежие томаты, зелень и фирменный соус • 370 г', price: 250, image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80', badge: null },
-      { id: 7, category: 'pizza', name: 'Пепперони 32 см', description: 'Тонкое хрустящее тесто, тянущийся сыр моцарелла, пикантные колбаски пепперони (халяль), томатный соус • 580 г', price: 490, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
+      { id: 7, category: 'pizza', name: 'Пепперони 32 см', description: 'Тонкое хрустящее тесто, тянущийся сыр моцарелла, пикантные колбаски пепперони, томатный соус • 580 г', price: 490, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
       { id: 8, category: 'pizza', name: 'Маргарита', description: 'Классическая итальянская рецептура: сливочная моцарелла, спелые томаты, ароматный базилик и оливковое масло • 520 г', price: 390, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80', badge: null },
       { id: 9, category: 'pizza', name: 'Мясная ассорти', description: 'Говядина, копченая куриная грудка, пепперони, болгарский перец, красный лук, моцарелла и соус барбекю • 660 г', price: 560, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80', badge: 'Выбор шефа' },
       { id: 10, category: 'sushi', name: 'Филадельфия классик', description: 'Нежный охлажденный лосось, сливочный сыр креметте, свежий огурец, рис, нори (8 шт.) • 260 г', price: 450, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80', badge: 'Хит' },
@@ -353,7 +351,6 @@
       }, 2800);
     }
 
-    // Проверка, не заблокировано ли устройство администратором
     async function isDeviceBanned() {
       try {
         const snap = await get(ref(db, `banned_devices/${deviceId}`));
@@ -559,7 +556,6 @@
       cartModalEl.classList.add('hidden');
     }
 
-    // Отправка заказа в Firebase с меткой устройства
     async function sendOrderToKitchen() {
       const entries = Object.entries(cart);
       if (entries.length === 0) return;
@@ -622,7 +618,6 @@
       }
     }
 
-    // Отправка сервисного запроса (Вызов официанта / Счет)
     async function sendServiceRequest(serviceType, titleText) {
       if (await isDeviceBanned()) {
         showToast('⛔ Действие ограничено администратором.');
