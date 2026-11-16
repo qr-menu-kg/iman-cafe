@@ -3,139 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Cafe — Панель управления (Админ)</title>
+  <title>Панель управления кафе (Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+  </style>
 </head>
-<body class="p-4 sm:p-8 max-w-7xl mx-auto">
+<body class="antialiased min-h-screen">
 
-  <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-3xl shadow-sm mb-6 gap-4">
-    <div>
-      <h1 class="text-2xl font-black text-gray-900">💼 Smart Cafe Admin</h1>
-      <p class="text-xs text-gray-500">Управление финансами, стоп-листом и QR-кодами столов</p>
+  <!-- Экран входа -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white rounded-3xl border border-gray-200 p-8 shadow-xl">
+      <div class="text-center mb-6">
+        <span class="inline-block px-3 py-1 bg-amber-100 text-amber-700 font-bold text-xs rounded-full mb-2">SaaS Панель</span>
+        <h1 class="text-2xl font-extrabold text-gray-900">Вход для владельца</h1>
+        <p class="text-xs text-gray-500 mt-1">Управление меню, ценами и стоп-листом</p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Email</label>
+          <input type="email" id="emailInput" required placeholder="admin@ulugbek.kg" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Пароль</label>
+          <input type="password" id="passwordInput" required placeholder="••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <p id="loginError" class="hidden text-xs text-rose-600 font-semibold"></p>
+        <button type="submit" class="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm rounded-xl transition shadow-md">
+          Войти в кабинет
+        </button>
+      </form>
     </div>
-    <div class="flex gap-2 bg-gray-100 p-1 rounded-2xl">
-      <button onclick="switchTab('fin')" id="btnFin" class="px-4 py-2 text-xs font-bold rounded-xl bg-gray-900 text-white">📊 Финансы</button>
-      <button onclick="switchTab('menu')" id="btnMenu" class="px-4 py-2 text-xs font-bold rounded-xl text-gray-600">🍔 Меню & Стоп-лист</button>
-      <button onclick="switchTab('qr')" id="btnQr" class="px-4 py-2 text-xs font-bold rounded-xl text-gray-600">🖨 Генератор QR</button>
-    </div>
-  </header>
+  </div>
 
-  <!-- ВКЛАДКА 1: ФИНАНСЫ -->
-  <section id="tabFin" class="space-y-6">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"><p class="text-xs text-gray-400 font-semibold">Выручка за всё время</p><p id="statRevenue" class="text-3xl font-black text-emerald-600 mt-1">0 сом</p></div>
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"><p class="text-xs text-gray-400 font-semibold">Всего заказов</p><p id="statOrders" class="text-3xl font-black text-gray-900 mt-1">0</p></div>
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"><p class="text-xs text-gray-400 font-semibold">Средний чек</p><p id="statAvg" class="text-3xl font-black text-amber-600 mt-1">0 сом</p></div>
-    </div>
-    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-      <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-900">Последние закрытые заказы</h3><button onclick="exportCSV()" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl">📥 Скачать CSV отчет</button></div>
-      <div id="ordersTableContainer" class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b text-xs text-gray-400 uppercase"><tr><th class="pb-3">Время</th><th class="pb-3">Стол</th><th class="pb-3">Состав</th><th class="pb-3">Сумма</th></tr></thead><tbody id="ordersTableBody"></tbody></table></div>
-    </div>
-  </section>
+  <!-- Основная панель администратора -->
+  <div id="adminPanel" class="hidden max-w-4xl mx-auto p-4 sm:p-6 pb-20">
+    
+    <!-- Шапка -->
+    <header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-gray-200 mb-6">
+      <div>
+        <h1 id="adminCafeName" class="text-2xl font-extrabold text-gray-900">Загрузка...</h1>
+        <p class="text-xs text-gray-500 mt-0.5">ID заведения: <span id="cafeIdDisplay" class="font-mono font-bold text-gray-700"></span></p>
+      </div>
+      <button onclick="window.logout()" class="px-4 py-2 bg-white hover:bg-gray-100 text-gray-700 font-bold text-xs rounded-xl border border-gray-300 transition">
+        Выйти
+      </button>
+    </header>
 
-  <!-- ВКЛАДКА 2: МЕНЮ И СТОП-ЛИСТ -->
-  <section id="tabMenu" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-      <h3 class="font-bold text-gray-900 mb-4">Управление наличием (Стоп-лист в 1 клик)</h3>
-      <div id="stopListContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </div>
-  </section>
-
-  <!-- ВКЛАДКА 3: ГЕНЕРАТОР QR СТОЛОВ -->
-  <section id="tabQr" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center max-w-md mx-auto">
-      <h3 class="font-bold text-gray-900 mb-2">Генерация QR-кодов для столов</h3>
-      <p class="text-xs text-gray-500 mb-4">Введите номер столика, чтобы получить готовую ссылку</p>
-      <input type="number" id="qrTableInput" value="1" min="1" class="w-full p-3 bg-gray-50 border rounded-2xl text-center font-bold text-lg mb-4 outline-none focus:border-amber-500">
-      <div id="qrResult" class="p-4 bg-gray-50 rounded-2xl mb-4 font-mono text-xs text-gray-700 break-all">Ссылка появится здесь</div>
-      <button onclick="generateQR()" class="w-full py-3 bg-gray-900 text-white font-bold text-xs rounded-2xl">Сгенерировать ссылку</button>
-    </div>
-  </section>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-database.js";
-
-    const db = getDatabase(initializeApp({
-      databaseURL: "https://iman-menu-default-rtdb.firebaseio.com"
-    }));
-
-    let allOrders = {}, menuItems = [
-      { id: 1, name: 'Классический говяжий бургер', price: 240 },
-      { id: 2, name: 'Чизбургер делюкс', price: 270 },
-      { id: 3, name: 'Фирменный бургер', price: 360 },
-      { id: 4, name: 'Шаурма классическая куриная', price: 190 },
-      { id: 5, name: 'Пепперони 32 см', price: 490 },
-      { id: 6, name: 'Филадельфия классик', price: 450 },
-      { id: 7, name: 'Шашлык из баранины', price: 350 },
-      { id: 8, name: 'Домашний лимонад', price: 120 },
-      { id: 9, name: 'Кола 0.5л', price: 85 }
-    ], stopList = {};
-
-    onValue(ref(db, 'orders'), snap => {
-      allOrders = snap.val() || {};
-      updateFinances();
-    });
-
-    onValue(ref(db, 'menu_settings'), snap => {
-      const data = snap.val();
-      if (data) {
-        if (data.stopList) stopList = data.stopList;
-        if (data.items) menuItems = data.items;
-      }
-      renderStopList();
-    });
-
-    function updateFinances() {
-      const list = Object.values(allOrders).filter(o => o.type !== 'service');
-      const revenue = list.reduce((acc, o) => acc + (o.total || 0), 0);
-      document.getElementById('statRevenue').textContent = `${revenue} сом`;
-      document.getElementById('statOrders').textContent = list.length;
-      document.getElementById('statAvg').textContent = list.length ? `${Math.round(revenue / list.length)} сом` : '0 сом';
-
-      document.getElementById('ordersTableBody').innerHTML = list.reverse().slice(0, 15).map(o => `
-        <tr class="border-b border-gray-100 last:border-0"><td class="py-3">${o.timeString || '---'}</td><td class="py-3 font-bold">Стол №${o.table}</td><td class="py-3 text-gray-500">${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td><td class="py-3 font-black">${o.total} сом</td></tr>
-      `).join('');
-    }
-
-    function renderStopList() {
-      document.getElementById('stopListContainer').innerHTML = menuItems.map(item => {
-        const isStopped = stopList[item.id] === true;
-        return `
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border">
-            <div><h4 class="font-bold text-sm">${item.name}</h4><p class="text-xs text-gray-500">${item.price} сом</p></div>
-            <button onclick="toggleStop(${item.id})" class="px-4 py-2 rounded-xl text-xs font-bold ${isStopped ? 'bg-red-500 text-white' : 'bg-emerald-600 text-white'}">${isStopped ? 'В стопе' : 'В наличии'}</button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    window.toggleStop = id => {
-      stopList[id] = !stopList[id];
-      set(ref(db, 'menu_settings'), { items: menuItems, stopList });
-    };
-
-    window.switchTab = tab => {
-      ['Fin', 'Menu', 'Qr'].forEach(t => document.getElementById('tab' + t).classList.add('hidden'));
-      ['Fin', 'Menu', 'Qr'].forEach(t => document.getElementById('btn' + t).className = "px-4 py-2 text-xs font-bold rounded-xl text-gray-600");
-      document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
-      document.getElementById('btn' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-4 py-2 text-xs font-bold rounded-xl bg-gray-900 text-white";
-    };
-
-    window.generateQR = () => {
-      const t = document.getElementById('qrTableInput').value;
-      const link = `${window.location.origin}/?table=${t}`;
-      document.getElementById('qrResult').innerHTML = `Ссылка для стола №${t}: <br><a href="${link}" target="_blank" class="text-blue-600 underline">${link}</a>`;
-    };
-
-    window.exportCSV = () => {
-      let csv = "Time,Table,Total\n" + Object.values(allOrders).filter(o => o.type !== 'service').map(o => `${o.timeString},${o.table},${o.total}`).join("\n");
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'report.csv'; a.click();
-    };
-  </script>
-</body>
-</html>
+    <!-- Блок добавления нового блюда -->
+    <section class="bg-white rounded-2xl border border-gray-200 p-5 mb-6 shadow-sm">
+      <h2 class="text-base font-extrabold text-gray-900 mb-4">Добавить новое блюдо</h2>
+      <form id="addDishForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <input type="text" id="dishName" required placeholder="Название (напр. Лагман)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+        <input type="number" id="dishPrice" required placeholder="Цена в сомах (напр. 220)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+        <input type="text" id="dishDesc" placeholder="Описание (состав)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+        <input type="url" id="dishImg" placeholder="Ссылка на фото (https://...)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+        
+        <div class="sm:col-span-2 lg:col-span-4 flex justify-end mt-1">
+          <button type="submit" class="px-5 py-2.5 bg
