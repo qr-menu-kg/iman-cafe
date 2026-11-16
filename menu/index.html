@@ -44,7 +44,7 @@
         <p class="text-xs text-gray-500">Выбрано блюд: <span id="cartCount" class="font-bold text-gray-900">0</span></p>
         <p class="text-lg font-extrabold text-gray-900"><span id="cartTotal">0</span> сом</p>
       </div>
-      <button onclick="window.submitOrder()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition shadow-md">
+      <button onclick="window.submitOrder()" id="submitOrderBtn" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition shadow-md">
         Отправить на кухню
       </button>
     </div>
@@ -93,6 +93,8 @@
 
       list.innerHTML = items.map(item => {
         const isStopped = stopList[item.id] === true;
+        const qty = cart[item.id] || 0;
+        
         return `
           <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between ${isStopped ? 'opacity-50' : ''}">
             <div>
@@ -109,7 +111,14 @@
               <span class="font-extrabold text-gray-900">${item.price} сом</span>
               ${isStopped 
                 ? `<span class="text-xs font-bold text-rose-500">Нет в наличии</span>` 
-                : `<button onclick="window.addToCart('${item.id}')" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition">+ В заказ</button>`
+                : (qty === 0 
+                    ? `<button onclick="window.addToCart('${item.id}')" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition">+ В заказ</button>`
+                    : `<div class="flex items-center gap-2">
+                         <button onclick="window.removeFromCart('${item.id}')" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 font-bold text-gray-800 rounded-xl transition">-</button>
+                         <span class="font-bold text-sm w-4 text-center">${qty}</span>
+                         <button onclick="window.addToCart('${item.id}')" class="w-8 h-8 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl transition">+</button>
+                       </div>`
+                  )
               }
             </div>
           </div>
@@ -120,6 +129,18 @@
     window.addToCart = (id) => {
       cart[id] = (cart[id] || 0) + 1;
       updateCartUI();
+      renderMenu();
+    };
+
+    window.removeFromCart = (id) => {
+      if (cart[id]) {
+        cart[id]--;
+        if (cart[id] <= 0) {
+          delete cart[id];
+        }
+      }
+      updateCartUI();
+      renderMenu();
     };
 
     function updateCartUI() {
@@ -143,7 +164,23 @@
       }
     }
 
+    // --- АНТИХУЛИГАН (Защита от спама и фейковых кликов) ---
+    function checkAntiSpam(actionKey, cooldownSec = 15) {
+      const lastTime = localStorage.getItem(actionKey);
+      const now = Date.now();
+      if (lastTime && (now - parseInt(lastTime)) < cooldownSec * 1000) {
+        const remaining = Math.ceil((cooldownSec * 1000 - (now - parseInt(lastTime))) / 1000);
+        alert(`Подождите ${remaining} сек. перед повторной отправкой.`);
+        return false;
+      }
+      localStorage.setItem(actionKey, now.toString());
+      return true;
+    }
+
     window.callService = (title) => {
+      // Антихулиган для вызова официанта/счета (кулдаун 15 секунд)
+      if (!checkAntiSpam('last_service_call', 15)) return;
+
       push(ref(db, 'orders'), {
         cafeId,
         table: tableNum,
@@ -155,11 +192,16 @@
     };
 
     window.submitOrder = () => {
+      // Антихулиган для отправки заказа на кухню (кулдаун 20 секунд от спама заказами)
+      if (!checkAntiSpam('last_order_submit', 20)) return;
+
       const itemsList = Object.entries(cart).map(([id, qty]) => ({
         name: menuData[id].name,
         qty,
         price: menuData[id].price
       }));
+
+      if (itemsList.length === 0) return;
 
       push(ref(db, 'orders'), {
         cafeId,
@@ -171,6 +213,7 @@
       }).then(() => {
         cart = {};
         updateCartUI();
+        renderMenu();
         alert('Заказ успешно отправлен на кухню!');
       });
     };
