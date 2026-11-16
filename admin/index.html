@@ -55,18 +55,26 @@
     <!-- Блок добавления нового блюда -->
     <section class="bg-white rounded-2xl border border-gray-200 p-5 mb-6 shadow-sm">
       <h2 class="text-base font-extrabold text-gray-900 mb-4">Добавить новое блюдо</h2>
-      <form id="addDishForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <form id="addDishForm" onsubmit="return false;" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <input type="text" id="dishName" required placeholder="Название (напр. Лагман)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
         <input type="number" id="dishPrice" required placeholder="Цена в сомах (напр. 220)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
         <input type="text" id="dishDesc" placeholder="Описание (состав)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
         <input type="url" id="dishImg" placeholder="Ссылка на фото (https://...)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
         
         <div class="sm:col-span-2 lg:col-span-4 flex justify-end mt-1">
-          <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition shadow-sm">
+          <button type="submit" id="addDishBtn" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition shadow-sm">
             Добавить в меню
           </button>
         </div>
       </form>
+    </section>
+
+    <!-- Список блюд в админке -->
+    <section class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+      <h2 class="text-base font-extrabold text-gray-900 mb-4">Управление меню</h2>
+      <div id="adminMenuList" class="space-y-3">
+        <p class="text-xs text-gray-400">Загрузка блюд...</p>
+      </div>
     </section>
 
   </div>
@@ -75,7 +83,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBohllCT8Jzt23W3kcjRt8n-yOUWZEfxcU",
@@ -98,6 +106,9 @@
     const emailInput = document.getElementById('emailInput');
     const passwordInput = document.getElementById('passwordInput');
     const logoutBtn = document.getElementById('logoutBtn');
+    const addDishForm = document.getElementById('addDishForm');
+
+    let currentUserId = null;
 
     // Обработка входа
     loginForm.addEventListener('submit', async () => {
@@ -118,15 +129,78 @@
     // Отслеживание состояния сессии
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        currentUserId = user.uid;
         loginScreen.classList.add('hidden');
         adminPanel.classList.remove('hidden');
         document.getElementById('cafeIdDisplay').textContent = user.uid;
         document.getElementById('adminCafeName').textContent = "Кабинет владельца";
+        loadAdminMenu(user.uid);
       } else {
+        currentUserId = null;
         loginScreen.classList.remove('hidden');
         adminPanel.classList.add('hidden');
       }
     });
+
+    // Добавление блюда
+    addDishForm.addEventListener('submit', () => {
+      if (!currentUserId) return;
+
+      const name = document.getElementById('dishName').value.trim();
+      const price = Number(document.getElementById('dishPrice').value);
+      const description = document.getElementById('dishDesc').value.trim();
+      const image = document.getElementById('dishImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+
+      if (!name || !price) return;
+
+      const newDishRef = push(ref(db, `cafes/${currentUserId}/menu`));
+      set(newDishRef, {
+        id: newDishRef.key,
+        name,
+        price,
+        description,
+        image
+      }).then(() => {
+        addDishForm.reset();
+        alert('Блюдо успешно добавлено в меню!');
+      });
+    });
+
+    // Загрузка меню в админку
+    function loadAdminMenu(uid) {
+      onValue(ref(db, `cafes/${uid}/menu`), (snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('adminMenuList');
+        
+        if (!data) {
+          container.innerHTML = '<p class="text-xs text-gray-400">Меню пока пустое. Добавьте первое блюдо выше.</p>';
+          return;
+        }
+
+        container.innerHTML = Object.entries(data).map(([key, item]) => `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div class="flex items-center gap-3">
+              <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg">
+              <div>
+                <h3 class="font-bold text-sm text-gray-900">${item.name}</h3>
+                <p class="text-xs text-gray-500">${item.price} сом · ${item.description || 'Без описания'}</p>
+              </div>
+            </div>
+            <button onclick="window.deleteDish('${key}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-lg transition">
+              Удалить
+            </button>
+          </div>
+        `).join('');
+      });
+    }
+
+    // Удаление блюда
+    window.deleteDish = (dishKey) => {
+      if (!currentUserId) return;
+      if (confirm('Точно удалить это блюдо из меню?')) {
+        remove(ref(db, `cafes/${currentUserId}/menu/${dishKey}`));
+      }
+    };
   </script>
 </body>
 </html>
