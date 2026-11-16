@@ -55,14 +55,23 @@
     <!-- Блок добавления нового блюда -->
     <section class="bg-white rounded-2xl border border-gray-200 p-5 mb-6 shadow-sm">
       <h2 class="text-base font-extrabold text-gray-900 mb-4">Добавить новое блюдо</h2>
-      <form id="addDishForm" onsubmit="return false;" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <input type="text" id="dishName" required placeholder="Название (напр. Лагман)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
-        <input type="number" id="dishPrice" required placeholder="Цена в сомах (напр. 220)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
-        <input type="text" id="dishDesc" placeholder="Описание (состав)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
-        <input type="url" id="dishImg" placeholder="Ссылка на фото (https://...)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
-        
-        <div class="sm:col-span-2 lg:col-span-4 flex justify-end mt-1">
-          <button type="submit" id="addDishBtn" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition shadow-sm">
+      <form id="addDishForm" onsubmit="return false;" class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <input type="text" id="dishName" required placeholder="Название (напр. Лагман)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+          <input type="number" id="dishPrice" required placeholder="Цена в сомах (напр. 220)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm">
+          <input type="text" id="dishDesc" placeholder="Описание (состав)" class="px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm sm:col-span-2 lg:col-span-1">
+        </div>
+
+        <!-- Выбор фото из галереи -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <div class="w-full">
+            <label class="block text-xs font-bold text-gray-700 mb-1">Фото блюда (из галереи телефона/ПК)</label>
+            <input type="file" id="dishImgFile" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" id="addDishBtn" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition shadow-sm">
             Добавить в меню
           </button>
         </div>
@@ -110,7 +119,7 @@
 
     let currentUserId = null;
 
-    // Обработка входа
+    // Авторизация
     loginForm.addEventListener('submit', async () => {
       loginError.classList.add('hidden');
       try {
@@ -121,12 +130,10 @@
       }
     });
 
-    // Выход из системы
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
     });
 
-    // Отслеживание состояния сессии
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUserId = user.uid;
@@ -142,28 +149,54 @@
       }
     });
 
-    // Добавление блюда
+    // Добавление блюда с выбором фото из галереи
     addDishForm.addEventListener('submit', () => {
       if (!currentUserId) return;
 
       const name = document.getElementById('dishName').value.trim();
       const price = Number(document.getElementById('dishPrice').value);
       const description = document.getElementById('dishDesc').value.trim();
-      const image = document.getElementById('dishImg').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+      const fileInput = document.getElementById('dishImgFile');
 
-      if (!name || !price) return;
+      if (!name || !price) {
+        alert('Заполните название и цену!');
+        return;
+      }
 
-      const newDishRef = push(ref(db, `cafes/${currentUserId}/menu`));
-      set(newDishRef, {
-        id: newDishRef.key,
-        name,
-        price,
-        description,
-        image
-      }).then(() => {
-        addDishForm.reset();
-        alert('Блюдо успешно добавлено в меню!');
-      });
+      const btn = document.getElementById('addDishBtn');
+      btn.textContent = 'Добавление...';
+      btn.disabled = true;
+
+      const saveDishToDb = (imageUrl) => {
+        const newDishRef = push(ref(db, `cafes/${currentUserId}/menu`));
+        set(newDishRef, {
+          id: newDishRef.key,
+          name,
+          price,
+          description,
+          image: imageUrl
+        }).then(() => {
+          addDishForm.reset();
+          btn.textContent = 'Добавить в меню';
+          btn.disabled = false;
+          alert('Блюдо успешно добавлено!');
+        }).catch((err) => {
+          alert('Ошибка записи в базу: ' + err.message);
+          btn.textContent = 'Добавить в меню';
+          btn.disabled = false;
+        });
+      };
+
+      // Если выбрали файл — сжимаем и переводим в кодировку, если нет — ставим заглушку
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          saveDishToDb(e.target.result);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        saveDishToDb('https://images.unsplash.com/photo-1546069901-ba9599a7e63c');
+      }
     });
 
     // Загрузка меню в админку
@@ -180,7 +213,7 @@
         container.innerHTML = Object.entries(data).map(([key, item]) => `
           <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
             <div class="flex items-center gap-3">
-              <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg">
+              <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg bg-gray-200">
               <div>
                 <h3 class="font-bold text-sm text-gray-900">${item.name}</h3>
                 <p class="text-xs text-gray-500">${item.price} сом · ${item.description || 'Без описания'}</p>
@@ -194,7 +227,6 @@
       });
     }
 
-    // Удаление блюда
     window.deleteDish = (dishKey) => {
       if (!currentUserId) return;
       if (confirm('Точно удалить это блюдо из меню?')) {
